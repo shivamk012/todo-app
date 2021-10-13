@@ -1,28 +1,17 @@
 <template> 
     <div class="header">
         <input type="text" placeholder="what needs to be done" class="inputField" @keyup.enter="addItem" v-model="newTodo">
-        <div
-            v-for = "(item,index) in cachedTodoList"
+        <todoItem
+            v-for = "(item,i) in cachedTodoList"
             :key = "item.id"
-            class = "todo-item"
+            :todo = "item"
+            :index = "i"
+            @removedTodo = "removeItem"
+            @editTodo = "editItem"
+            @toggleComplete = "toogleComplete"
         > 
-            <div>
-                <div>
-                    <input type="text" v-if="!flag[index]" placeholder="task" v-model="editTodo" @keyup.enter="editItem(index)" :id="item.id" @blur="editItem(index)" @keyup.esc="cancelEdit(index)">    
-                </div> 
-                <div class="todo-items">
-                    <div v-if="flag[index]" @click="toogleComplete(index)">
-                        <input type="checkbox" :checked="item.isComplete">  
-                    </div>
-                    <div v-if="flag[index]" @click="enableItem(index)" :class="{ complete : item.isComplete }">
-                        {{item.data}}
-                    </div>        
-                </div> 
-            </div>
-            <div @click="removeItem(index)" class="removeItemBtn">
-                &times;
-            </div>
-        </div>
+            
+        </todoItem>
         <div class="itemsLeft">
             <div>
                 <input type="checkbox" @change="toggleAll" :checked="anyRemaining">
@@ -48,14 +37,18 @@
 </template>
 
 <script>
+import todoItem from './todoItem.vue'
+
 export default {
     name : 'todoApp',
+    components :{
+        todoItem,
+    },
     data() {
         return {
             newTodo : '',
             editTodo : '',
-            cur : 0,
-            flag : [],
+            cur : 0, // stores the current add postion of element 
             todoList : [],
             choice : 1,
         }
@@ -86,36 +79,25 @@ export default {
                 return;
             }
             this.todoList.push({
-                id : this.cur,
-                data : this.newTodo,
-                isComplete : false
+                id : this.cur, //unique id of element
+                data : this.newTodo, //stores task name
+                isComplete : false, // stores trye if task is completed
+                flag : true //stores false if element is in edit mode else true 
             });
-            this.flag[this.cur] = true;
             this.newTodo = '';
             this.cur = this.cur+1;
         },
         removeItem(index){  
             this.todoList.splice(index,1);
         },
-        enableItem(index){
-            this.flag[index] = false;
-        },
-        editItem(index){
-            if(this.editTodo.trim().length === 0) {
+        editItem(index , edittodo){
+            if(edittodo.trim().length === 0) {
                 return;
             }
-            this.todoList[index].data = this.editTodo;
-            this.editTodo = '';
-            this.flag[index] = true; 
+            this.todoList[index].data = edittodo;
+            this.todoList[index].flag = true; 
             let temp = this.todoList[index].isComplete;
             this.todoList[index].isComplete = false; 
-        },
-        cancelEdit(index){
-            if(this.editTodo.trim().length === 0) {
-                return;
-            }
-            this.editTodo = '';
-            this.flag[index] = true;
         },
         toogleComplete(index){
             this.todoList[index].isComplete = !this.todoList[index].isComplete;
@@ -146,24 +128,6 @@ export default {
         padding: 12px 20px;
         margin: 8px 0;
         box-sizing: border-box;
-    }
-
-    .todo-item{
-        display: flex;
-        justify-content: space-around;
-    }
-
-    .removeItemBtn{
-        cursor: pointer;;
-    }
-
-    .todo-items{
-        display: flex;
-        justify-content: space-around;
-    }
-
-    .complete{
-        text-decoration: line-through;
     }
 
     .itemsLeft{
