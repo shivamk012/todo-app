@@ -6,9 +6,6 @@
             :key = "item.id"
             :todo = "item"
             :index = "i"
-            @removedTodo = "removeItem"
-            @editTodo = "editItem"
-            @toggleComplete = "toogleComplete"
         > 
             
         </todoItem>
@@ -20,7 +17,7 @@
             <div class="itemsLeft">
                 <div>
                     <button @click="filterList(1)">all</button>
-                </div>
+                </div>  
                 <div @click="filterList(2)">
                     <button>active</button>
                 </div>
@@ -47,30 +44,18 @@ export default {
     data() {
         return {
             newTodo : '',
-            editTodo : '',
             cur : 0, // stores the current add postion of element 
-            todoList : [],
-            choice : 1,
         }
     },
     computed :{
         itemRemaining(){
-            return this.todoList.filter(todo => !todo.isComplete).length;
+            return this.$store.getters.itemRemaining;
         },
         anyRemaining(){
-            return this.itemRemaining == 0;
+            return this.$store.getters.anyRemaining;
         },
         cachedTodoList(){
-            if(this.choice == 1){
-                return this.todoList;
-            }
-            else if(this.choice == 2){
-                return this.todoList.filter(todo => !todo.isComplete);
-            }
-            else if(this.choice == 3){
-                return this.todoList.filter(todo => todo.isComplete);
-            }
-            return this.todoList;
+            return this.$store.getters.cachedTodoList;
         }
     },
     methods :{
@@ -78,37 +63,23 @@ export default {
             if(this.newTodo.trim().length === 0) {
                 return;
             }
-            this.todoList.push({
+            let temp = {
                 id : this.cur, //unique id of element
                 data : this.newTodo, //stores task name
                 isComplete : false, // stores trye if task is completed
-                flag : true //stores false if element is in edit mode else true 
-            });
+                flag : true //stores false if element is in edit mode else true
+            };
+            this.$store.commit('addTodo',temp);
             this.newTodo = '';
             this.cur = this.cur+1;
         },
-        removeItem(index){  
-            this.todoList.splice(index,1);
-        },
-        editItem(index , edittodo){
-            if(edittodo.trim().length === 0) {
-                return;
-            }
-            this.todoList[index].data = edittodo;
-            this.todoList[index].flag = true; 
-            let temp = this.todoList[index].isComplete;
-            this.todoList[index].isComplete = false; 
-        },
-        toogleComplete(index){
-            this.todoList[index].isComplete = !this.todoList[index].isComplete;
-        },
         toggleAll(){
-            this.todoList.forEach((todo) => (
+            this.$store.state.todoList.forEach((todo) => (
                 todo.isComplete = event.target.checked
             ));
         },
-        filterList(userList){
-            this.choice = userList;
+        filterList(userChoice){
+            this.$store.commit('updateFilter',userChoice);
         }
     },
 }

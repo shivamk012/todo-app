@@ -5,7 +5,7 @@
                 <input type="text" v-if="!flag" placeholder="task" v-model="edittodo" @keyup.enter="editTodo(index)" :id="id" @blur="editTodo(index)" @keyup.esc="cancelEdit(index)">    
             </div> 
             <div class="todo-items">
-                <div v-if="todo.flag" @change="toggleComplete(index)">
+                <div v-if="flag" @change="toggleComplete(index)">
                     <input type="checkbox" :checked="todo.isComplete">  
                 </div>
                 <div v-if="flag" @click="enableTodo(index)" :class="{ complete : todo.isComplete }">
@@ -42,12 +42,19 @@ export default {
         }
     },
     methods :{
-        removeTodo(index){
-            this.$emit('removedTodo' , index);
+        removeTodo(id){
+            this.$store.commit('deleteTodo',id);
         },
-        editTodo(index){
-            this.$emit('editTodo',index,this.edittodo);
-            if(this.edittodo.trim().length != 0) this.data = this.edittodo;
+        editTodo(id){
+            if(this.edittodo.trim().length === 0) {
+                return;
+            }
+            this.$store.commit('editTodo',{
+                id : id ,
+                edit : this.edittodo
+            });
+            
+            this.data = this.edittodo;
             this.flag = true;
             this.edittodo = '';
         },
@@ -55,7 +62,7 @@ export default {
             this.flag = false;
         },
         toggleComplete(index){
-            this.$emit('toggleComplete',index);
+            this.$store.state.todoList[index].isComplete = !this.$store.state.todoList[index].isComplete;
         },
         cancelEdit(index){
             if(this.edittodo.trim().length === 0) {
