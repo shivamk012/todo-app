@@ -1,4 +1,7 @@
+import { query } from '@firebase/firestore';
 import { createStore } from 'vuex'
+import { getFirestore , collection, getDocs , setDoc ,doc} from 'firebase/firestore/lite';
+import db from '../firebase'
 
 export const store = createStore({
   state : {
@@ -29,6 +32,16 @@ export const store = createStore({
     }
   },
   mutations : {
+    intialiseTodo(state , list){
+      list.forEach(todo => {
+        state.todoList.push({
+            id : todo.index,
+            data : todo.task,
+            isComplete : todo.isComplete,
+            flag : todo.flag,
+        });
+      })
+    },
     addTodo(state , todo){
       state.todoList.push(todo);
     },
@@ -42,6 +55,40 @@ export const store = createStore({
     },
     updateFilter(state , filter){
       state.choice = filter;
+    },
+    toggleComplete(state , id){
+      state.todoList[id].isComplete = !state.todoList[id].isComplete;
+    }
+  },
+  actions : {
+    getTodo(context){
+      
+      const q = query(collection(db, "TodoList"));
+      
+      const querySnapshot = getDocs(q);
+      querySnapshot.then(todos => { 
+        let temp = [];
+        todos.forEach(doc => {
+          // console.log(doc); 
+          let newObj = doc.data();
+          temp.push(newObj);
+        })
+        context.commit('intialiseTodo',temp);
+      });
+      // querySnapshot.forEach((doc) => {
+      //   // doc.data() is never undefined for query doc snapshots
+      //   console.log(doc.id, " => ", doc.data());
+      // });
+    },
+    add(context , todo){
+      setDoc(doc(db, "TodoList" ,`${todo.id}`), {
+        index : todo.id,
+        task : todo.data,
+        isComplete : todo.isComplete,
+        flag : todo.flag,
+        time : new Date(),
+      });
+      context.commit('addTodo' , todo);
     }
   }
 })  

@@ -69,7 +69,7 @@ export default {
                 isComplete : false, // stores trye if task is completed
                 flag : true //stores false if element is in edit mode else true
             };
-            this.$store.commit('addTodo',temp);
+            this.$store.dispatch('add',temp); // calling addTodo function in mutations
             this.newTodo = '';
             this.cur = this.cur+1;
         },
@@ -79,8 +79,11 @@ export default {
             ));
         },
         filterList(userChoice){
-            this.$store.commit('updateFilter',userChoice);
+            this.$store.commit('updateFilter',userChoice); // calling updateFilter function in mutations
         }
+    },
+    created() {
+        this.$store.dispatch('getTodo');
     },
 }
 </script>
