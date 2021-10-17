@@ -1,6 +1,6 @@
 import { query } from '@firebase/firestore';
 import { createStore } from 'vuex'
-import { getFirestore , collection, getDocs , setDoc ,doc} from 'firebase/firestore/lite';
+import { getFirestore , collection, getDocs , addDoc , setDoc ,doc , deleteDoc , updateDoc} from 'firebase/firestore/lite';
 import db from '../firebase'
 
 export const store = createStore({
@@ -45,42 +45,48 @@ export const store = createStore({
     addTodo(state , todo){
       state.todoList.push(todo);
     },
-    deleteTodo(state,id){
-      state.todoList.splice(id,1);
+    deleteTodo(state,obj){
+      state.todoList.splice(obj.index,1);
     },
     editTodo(state,obj){
-      state.todoList[obj.id].data = obj.edit;
-      state.todoList[obj.id].flag = true; 
-      state.todoList[obj.id].isComplete = false; 
+      state.todoList[obj.index].data = obj.edit;
+      state.todoList[obj.index].flag = true; 
+      state.todoList[obj.index].isComplete = false; 
     },
     updateFilter(state , filter){
       state.choice = filter;
     },
-    toggleComplete(state , id){
-      state.todoList[id].isComplete = !state.todoList[id].isComplete;
+    toggleComplete(state , obj){
+      state.todoList[obj.index].isComplete = !state.todoList[obj.index].isComplete;
     }
   },
   actions : {
     getTodo(context){
       
       const q = query(collection(db, "TodoList"));
-      
+      //getDocs returns a promise
       const querySnapshot = getDocs(q);
       querySnapshot.then(todos => { 
         let temp = [];
         todos.forEach(doc => {
-          // console.log(doc); 
+          //data() is always defined for each doc , it contains the object  
           let newObj = doc.data();
           temp.push(newObj);
         })
         context.commit('intialiseTodo',temp);
       });
-      // querySnapshot.forEach((doc) => {
-      //   // doc.data() is never undefined for query doc snapshots
-      //   console.log(doc.id, " => ", doc.data());
-      // });
     },
     add(context , todo){
+      //   addDoc gives a auto generated id to each document added
+      //   const docRef = addDoc(collection(db, "TodoList"), {
+      //   index : todo.id,
+      //   task : todo.data,
+      //   isComplete : todo.isComplete,
+      //   flag : todo.flag,
+      //   time : new Date(),
+      // });
+
+      //we have to provide a id to setDoc
       setDoc(doc(db, "TodoList" ,`${todo.id}`), {
         index : todo.id,
         task : todo.data,
@@ -89,6 +95,27 @@ export const store = createStore({
         time : new Date(),
       });
       context.commit('addTodo' , todo);
+    },
+    deleteItem(context , obj){
+      console.log(`${obj.id}}`);
+      deleteDoc(doc(db, 'TodoList', `${obj.id}`));
+      context.commit('deleteTodo',obj);
+    },
+    updateItem(context , obj){
+      const docRef = doc(db, 'TodoList', `${obj.id}`);
+
+      updateDoc(docRef, {
+        task : obj.edit,
+      });
+      context.commit('editTodo' , obj);
+    },
+    Complete(context , obj){
+      const docRef = doc(db,'TodoList',`${obj.id}`);
+      
+      updateDoc(docRef,{
+        isComplete : obj.isComplete,
+      });
+      context.commit('toggleComplete',obj)
     }
   }
 })  

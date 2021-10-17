@@ -74,9 +74,13 @@ export default {
             this.cur = this.cur+1;
         },
         toggleAll(){
-            this.$store.state.todoList.forEach((todo) => (
-                todo.isComplete = event.target.checked
-            ));
+            this.$store.todoList.forEach(todo => {
+                todo.isComplete = event.target.checked;
+                this.$store.dispatch('Complete' , {
+                    id : todo.id,
+                    isComplete : event.target.checked,
+                })
+            });
         },
         filterList(userChoice){
             this.$store.commit('updateFilter',userChoice); // calling updateFilter function in mutations

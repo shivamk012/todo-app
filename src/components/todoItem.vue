@@ -43,15 +43,19 @@ export default {
     },
     methods :{
         removeTodo(id){
-            this.$store.commit('deleteTodo',id);
+            this.$store.dispatch('deleteItem',{
+                id : id,
+                index : this.index,
+            });
         },
         editTodo(id){
             if(this.edittodo.trim().length === 0) {
                 return;
             }
-            this.$store.commit('editTodo',{
+            this.$store.dispatch('updateItem',{
                 id : id ,
-                edit : this.edittodo
+                edit : this.edittodo,
+                index : this.index,
             });
             
             this.data = this.edittodo;
@@ -62,7 +66,12 @@ export default {
             this.flag = false;
         },
         toggleComplete(id){
-            this.$store.commit('toggleComplete',id);
+            this.$store.dispatch('Complete',{
+                id : this.id ,
+                index : this.index,
+                isComplete : !this.isComplete, 
+            });
+            this.isComplete = !this.isComplete;
         },
         cancelEdit(id){
             if(this.edittodo.trim().length === 0) {
