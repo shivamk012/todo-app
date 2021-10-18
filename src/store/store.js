@@ -7,7 +7,7 @@ export const store = createStore({
   state : {
     //all the global var are kept here
     todoList : [],
-    choice : 1,
+    choice : 1, 
   },
   getters :{
     //getters are the same as computed properties 
@@ -87,7 +87,7 @@ export const store = createStore({
       // });
 
       //we have to provide a id to setDoc
-      setDoc(doc(db, "TodoList" ,`${todo.id}`), {
+      setDoc(doc(db, "TodoList" ,`${todo.id}`), { 
         index : todo.id,
         task : todo.data,
         isComplete : todo.isComplete,
@@ -97,12 +97,11 @@ export const store = createStore({
       context.commit('addTodo' , todo);
     },
     deleteItem(context , obj){
-      console.log(`${obj.id}}`);
-      deleteDoc(doc(db, 'TodoList', `${obj.id}`));
+      deleteDoc(doc(db, 'TodoList', `${obj.id}`));// gets the reference of document with id = obj.id
       context.commit('deleteTodo',obj);
     },
     updateItem(context , obj){
-      const docRef = doc(db, 'TodoList', `${obj.id}`);
+      const docRef = doc(db, 'TodoList', `${obj.id}`);// gets the reference of document with id = obj.id
 
       updateDoc(docRef, {
         task : obj.edit,
@@ -110,7 +109,7 @@ export const store = createStore({
       context.commit('editTodo' , obj);
     },
     Complete(context , obj){
-      const docRef = doc(db,'TodoList',`${obj.id}`);
+      const docRef = doc(db,'TodoList',`${obj.id}`); // gets the reference of document with id = obj.id
       
       updateDoc(docRef,{
         isComplete : obj.isComplete,
